@@ -1,0 +1,594 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>NutriPiano completo</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700&family=Public+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: guscio d'app — barra laterale delle schermate, area di lavoro a destra; in modalità paziente un telefono al centro */
+:root{
+  --bg:#f3f6f3; --surface:#ffffff; --sunk:#e8eee9; --line:#d5ded7;
+  --fg:#1d2a23; --muted:#5d6e64; --accent:#2f7d5b; --accent-soft:#dcefe4; --accent-fg:#ffffff;
+  --warn:#b7791f; --warn-soft:#fbf0d9; --bad:#b4413a; --bad-soft:#f8e1df; --info:#2f6a9a; --info-soft:#dfeaf5;
+  --f1:#2f7d5b; --f2:#2f6a9a; --f3:#8a4fa3;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Public Sans", "Segoe UI", system-ui, sans-serif;
+  --mono:"IBM Plex Mono", ui-monospace, Consolas, monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#121915; --surface:#1a231e; --sunk:#222d27; --line:#2e3b34;
+  --fg:#e3ebe6; --muted:#9aaba1; --accent:#5fbf8f; --accent-soft:#1f3a2c; --accent-fg:#0d1a13;
+  --warn:#e0a84a; --warn-soft:#3a2f18; --bad:#e2766e; --bad-soft:#3b2120; --info:#79aee0; --info-soft:#1c2c3b;
+  --f1:#5fbf8f; --f2:#79aee0; --f3:#c08fd6; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#121915; --surface:#1a231e; --sunk:#222d27; --line:#2e3b34;
+  --fg:#e3ebe6; --muted:#9aaba1; --accent:#5fbf8f; --accent-soft:#1f3a2c; --accent-fg:#0d1a13;
+  --warn:#e0a84a; --warn-soft:#3a2f18; --bad:#e2766e; --bad-soft:#3b2120; --info:#79aee0; --info-soft:#1c2c3b;
+  --f1:#5fbf8f; --f2:#79aee0; --f3:#c08fd6; color-scheme:dark}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);font-size:14px;line-height:1.45}
+h1,h2,h3{font-family:var(--display);text-wrap:balance;margin:0;font-weight:700}
+h1{font-size:1.6rem} h2{font-size:1.15rem} h3{font-size:1rem}
+.num{font-family:var(--mono);font-variant-numeric:tabular-nums}
+button{font:inherit;cursor:pointer}
+button:focus-visible,a:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;
+  padding-block:12px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));
+  background:var(--surface);border-bottom:1px solid var(--line)}
+.marchio{display:flex;align-items:baseline;gap:10px}
+.marchio b{font-family:var(--display);font-size:1.3rem;color:var(--accent)}
+.marchio span{color:var(--muted);font-size:.85rem}
+.modo{display:flex;background:var(--sunk);border-radius:999px;padding:3px}
+.modo button{border:0;background:none;padding:6px 14px;border-radius:999px;color:var(--muted);font-weight:600}
+.modo button[aria-pressed="true"]{background:var(--accent);color:var(--accent-fg)}
+.legenda{display:flex;gap:10px;flex-wrap:wrap;font-size:.78rem;color:var(--muted)}
+
+.fase{display:inline-block;font-size:.68rem;font-weight:600;letter-spacing:.04em;text-transform:uppercase;
+  padding:1px 7px;border-radius:999px;border:1px solid currentColor;white-space:nowrap}
+.f1{color:var(--f1)} .f2{color:var(--f2)} .f3{color:var(--f3)}
+
+.guscio{display:grid;grid-template-columns:230px 1fr;min-height:calc(100vh - 60px)}
+nav.lato{background:var(--surface);border-right:1px solid var(--line);padding:14px 10px;display:flex;flex-direction:column;gap:2px}
+nav.lato .grp{font-size:.7rem;text-transform:uppercase;letter-spacing:.08em;color:var(--muted);padding:12px 10px 4px}
+nav.lato a{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;color:var(--fg);text-decoration:none}
+nav.lato a:hover{background:var(--sunk)}
+nav.lato a[aria-current="page"]{background:var(--accent-soft);color:var(--accent);font-weight:600}
+main{min-width:0;padding-block:20px 60px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.vista{max-width:1150px;margin:0 auto;display:flex;flex-direction:column;gap:16px}
+.testa{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between}
+.testa .sx{display:flex;flex-direction:column;gap:4px}
+.sotto{color:var(--muted)}
+.box{background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
+.griglia{display:grid;gap:16px}
+.g2{grid-template-columns:repeat(2,minmax(0,1fr))} .g3{grid-template-columns:repeat(3,minmax(0,1fr))} .g4{grid-template-columns:repeat(4,minmax(0,1fr))}
+.g-21{grid-template-columns:2fr 1fr}
+.btn{border:1px solid var(--line);background:var(--surface);color:var(--fg);padding:7px 12px;border-radius:8px;font-weight:500}
+.btn.p{background:var(--accent);border-color:var(--accent);color:var(--accent-fg)}
+.azioni{display:flex;gap:8px;flex-wrap:wrap}
+.chip{display:inline-block;padding:2px 8px;border-radius:999px;font-size:.75rem;font-weight:600}
+.ok{background:var(--accent-soft);color:var(--accent)} .att{background:var(--warn-soft);color:var(--warn)}
+.err{background:var(--bad-soft);color:var(--bad)} .inf{background:var(--info-soft);color:var(--info)}
+.kpi .v{font-family:var(--display);font-size:1.6rem;font-weight:700}
+.kpi .e{color:var(--muted);font-size:.8rem}
+.lista{display:flex;flex-direction:column}
+.riga{display:flex;gap:12px;align-items:center;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--line)}
+.riga:last-child{border-bottom:0}
+.riga .t{display:flex;flex-direction:column;min-width:0}
+.riga small{color:var(--muted)}
+.ora{font-family:var(--mono);color:var(--muted);width:46px;flex:none}
+.tab-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.88rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);white-space:nowrap}
+th{font-size:.72rem;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);font-weight:600}
+td.n,th.n{text-align:right;font-family:var(--mono)}
+.schede{display:flex;gap:4px;border-bottom:1px solid var(--line);overflow-x:auto}
+.schede button{border:0;background:none;padding:8px 12px;color:var(--muted);border-bottom:2px solid transparent;white-space:nowrap}
+.schede button[aria-selected="true"]{color:var(--accent);border-color:var(--accent);font-weight:600}
+.barra{height:8px;background:var(--sunk);border-radius:99px;overflow:hidden}
+.barra i{display:block;height:100%;background:var(--accent);border-radius:99px}
+.barra i.w{background:var(--warn)}
+.nota{font-size:.8rem;color:var(--muted)}
+.cerca{display:flex;gap:8px;flex-wrap:wrap}
+.cerca input{flex:1;min-width:180px;padding:8px 10px;border:1px solid var(--line);border-radius:8px;background:var(--surface);color:var(--fg);font:inherit}
+.avatar{width:34px;height:34px;border-radius:50%;background:var(--accent-soft);color:var(--accent);display:grid;place-items:center;font-weight:700;font-size:.8rem;flex:none}
+.pasto-b{border:1px solid var(--line);border-radius:8px;padding:10px 12px;display:flex;flex-direction:column;gap:6px}
+.pasto-b header{display:flex;justify-content:space-between;font-weight:600}
+.voce{display:flex;justify-content:space-between;gap:10px;font-size:.88rem}
+.voce span:last-child{font-family:var(--mono);color:var(--muted)}
+.cal{display:grid;grid-template-columns:50px repeat(5,minmax(110px,1fr));min-width:640px}
+.cal div{border-bottom:1px solid var(--line);border-right:1px solid var(--line);min-height:44px;padding:4px;font-size:.78rem}
+.cal .h{font-weight:600;text-align:center;background:var(--sunk)}
+.cal .o{font-family:var(--mono);color:var(--muted);text-align:right}
+.app{border-radius:6px;padding:4px 6px;background:var(--accent-soft);color:var(--accent);font-weight:600;display:block}
+.app.v{background:var(--info-soft);color:var(--info)}
+.msg{max-width:78%;padding:8px 12px;border-radius:12px;font-size:.88rem}
+.msg.in{background:var(--sunk);align-self:flex-start}
+.msg.out{background:var(--accent);color:var(--accent-fg);align-self:flex-end}
+.chat{display:flex;flex-direction:column;gap:8px}
+svg text{fill:var(--muted);font-family:var(--mono);font-size:10px}
+
+/* modalità paziente */
+.palco{display:flex;flex-wrap:wrap;gap:28px;justify-content:center;align-items:flex-start;padding-block:24px 60px;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.tel{width:340px;max-width:100%;background:var(--surface);border:10px solid var(--fg);border-radius:36px;overflow:hidden;display:flex;flex-direction:column;height:680px}
+.tel .sb{display:flex;justify-content:space-between;padding:8px 18px 4px;font-family:var(--mono);font-size:.7rem;color:var(--muted)}
+.tel .corpo{flex:1;overflow-y:auto;padding:8px 16px 16px;display:flex;flex-direction:column;gap:12px}
+.tel nav{display:grid;grid-template-columns:repeat(5,1fr);border-top:1px solid var(--line)}
+.tel nav button{border:0;background:none;padding:10px 2px 12px;font-size:.68rem;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px}
+.tel nav button[aria-pressed="true"]{color:var(--accent);font-weight:600}
+.tel nav svg{width:20px;height:20px;stroke:currentColor;fill:none;stroke-width:1.8}
+.spiega{max-width:340px;display:flex;flex-direction:column;gap:12px}
+.spiega li{margin-bottom:6px}
+.check{display:flex;gap:10px;align-items:center;padding:8px 0;border-bottom:1px solid var(--line)}
+.check i{width:18px;height:18px;border:2px solid var(--line);border-radius:5px;flex:none}
+.check.si i{background:var(--accent);border-color:var(--accent)}
+.check.si span{text-decoration:line-through;color:var(--muted)}
+.foto{height:84px;border-radius:8px;background:repeating-linear-gradient(45deg,var(--sunk),var(--sunk) 8px,var(--surface) 8px,var(--surface) 16px);display:grid;place-items:center;color:var(--muted);font-size:.75rem}
+
+@media (max-width:900px){
+  .guscio{grid-template-columns:1fr}
+  nav.lato{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);padding:8px}
+  nav.lato .grp{display:none}
+  nav.lato a{white-space:nowrap}
+  nav.lato a .fase{display:none}
+  .g2,.g3,.g4,.g-21{grid-template-columns:1fr}
+}
+@media (max-width:1100px) and (min-width:901px){.g4{grid-template-columns:repeat(2,minmax(0,1fr))}.g3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (prefers-reduced-motion:no-preference){.vista{animation:entra .18s ease-out}@keyframes entra{from{transform:translateY(4px)}to{transform:none}}}
+</style>
+
+<header class="top">
+  <div class="marchio"><b>NutriPiano</b><span>prototipo delle interfacce · dati di esempio inventati</span></div>
+  <div class="modo" role="group" aria-label="Chi usa l'app">
+    <button id="m-studio" aria-pressed="true">Nutrizionista</button>
+    <button id="m-paz" aria-pressed="false">App del paziente</button>
+  </div>
+  <div class="legenda"><span class="fase f1">Fase 1</span> già nella prova <span class="fase f2">Fase 2</span> prossima <span class="fase f3">Fase 3</span> dopo</div>
+</header>
+
+<!-- ============ MODALITÀ NUTRIZIONISTA ============ -->
+<div class="guscio" id="studio">
+<nav class="lato" aria-label="Schermate">
+  <div class="grp">Lavoro di ogni giorno</div>
+  <a href="#oggi">Oggi <span class="fase f2">F2</span></a>
+  <a href="#agenda">Agenda <span class="fase f3">F3</span></a>
+  <a href="#pazienti">Pazienti <span class="fase f1">F1</span></a>
+  <a href="#scheda">Scheda paziente <span class="fase f1">F1</span></a>
+  <a href="#messaggi">Messaggi <span class="fase f2">F2</span></a>
+  <div class="grp">Piani alimentari</div>
+  <a href="#dieta">Editor del piano <span class="fase f1">F1</span></a>
+  <a href="#modelli">Diete pronte e ricette <span class="fase f2">F2</span></a>
+  <a href="#bia">Bioimpedenza AKERN <span class="fase f2">F2</span></a>
+  <a href="#ai">Assistente AI <span class="fase f3">F3</span></a>
+  <div class="grp">Studio</div>
+  <a href="#fatture">Fatture <span class="fase f3">F3</span></a>
+  <a href="#privacy">Privacy e FSE <span class="fase f2">F2</span></a>
+</nav>
+<main>
+
+<!-- OGGI -->
+<section class="vista" id="v-oggi">
+  <div class="testa"><div class="sx"><h1>Buongiorno, dott.ssa Ferri</h1><span class="sotto">Lunedì 9 novembre · 6 visite oggi · 3 messaggi da leggere</span></div>
+  <div class="azioni"><button class="btn">+ Appuntamento</button><button class="btn p">+ Nuovo paziente</button></div></div>
+  <div class="griglia g4">
+    <div class="box kpi"><div class="e">Visite oggi</div><div class="v num">6</div><div class="e">prossima alle 10:30</div></div>
+    <div class="box kpi"><div class="e">Pazienti attivi</div><div class="v num">142</div><div class="e">+9 questo mese</div></div>
+    <div class="box kpi"><div class="e">Diario compilato ieri</div><div class="v num">78%</div><div class="e">dei pazienti con l'app</div></div>
+    <div class="box kpi"><div class="e">Incassato a novembre</div><div class="v num">1.840 €</div><div class="e">2 fatture da emettere</div></div>
+  </div>
+  <div class="griglia g-21">
+    <div class="box"><h2>Visite di oggi</h2><div class="lista">
+      <div class="riga"><span class="ora">09:00</span><div class="avatar">GV</div><div class="t" style="flex:1"><b>Giulia Verdi</b><small>Controllo · −3,2 kg in 8 settimane</small></div><span class="chip ok">Fatta</span></div>
+      <div class="riga"><span class="ora">10:30</span><div class="avatar">PN</div><div class="t" style="flex:1"><b>Paolo Neri</b><small>Prima visita sportiva · bioimpedenza</small></div><span class="chip inf">In studio</span></div>
+      <div class="riga"><span class="ora">12:00</span><div class="avatar">SG</div><div class="t" style="flex:1"><b>Sara Gialli</b><small>Videovisita · gravidanza 2° trimestre</small></div><span class="chip inf">Video</span></div>
+      <div class="riga"><span class="ora">15:00</span><div class="avatar">MB</div><div class="t" style="flex:1"><b>Marco Blu</b><small>Controllo · diabete tipo 2</small></div><span class="chip att">Da confermare</span></div>
+      <div class="riga"><span class="ora">16:30</span><div class="avatar">LB</div><div class="t" style="flex:1"><b>Luigi B.</b><small>Consegna nuovo piano</small></div><span class="chip ok">Confermata</span></div>
+      <div class="riga"><span class="ora">18:00</span><div class="avatar">EF</div><div class="t" style="flex:1"><b>E. F.</b><small>Controllo · pressione alta</small></div><span class="chip ok">Confermata</span></div>
+    </div></div>
+    <div class="griglia" style="align-content:start">
+      <div class="box"><h2>Da guardare</h2><div class="lista">
+        <div class="riga"><div class="t"><b>Marco Blu</b><small>glicemia a digiuno 148 nel diario</small></div><span class="chip err">Valore alto</span></div>
+        <div class="riga"><div class="t"><b>A. C.</b><small>nessun diario da 5 giorni</small></div><span class="chip att">Inattivo</span></div>
+        <div class="riga"><div class="t"><b>Sara Gialli</b><small>ha chiesto un cambio cena</small></div><span class="chip inf">Messaggio</span></div>
+      </div></div>
+      <div class="box"><h2>Scadenze</h2><div class="lista">
+        <div class="riga"><div class="t"><b>2 fatture</b><small>visite di venerdì</small></div><span class="chip att">Da emettere</span></div>
+        <div class="riga"><div class="t"><b>Consenso privacy</b><small>Paolo Neri, da firmare oggi</small></div><span class="chip att">Firma</span></div>
+      </div></div>
+    </div>
+  </div>
+</section>
+
+<!-- AGENDA -->
+<section class="vista" id="v-agenda" hidden>
+  <div class="testa"><div class="sx"><h1>Agenda</h1><span class="sotto">Settimana 9–13 novembre · promemoria automatici via SMS ed email 24 ore prima</span></div>
+  <div class="azioni"><button class="btn">‹</button><button class="btn">Oggi</button><button class="btn">›</button><button class="btn p">+ Appuntamento</button></div></div>
+  <div class="box tab-scroll"><div class="cal" id="cal"></div></div>
+  <div class="griglia g3">
+    <div class="box"><h3>Prenotazione online</h3><p class="nota">I pazienti scelgono un orario libero da un link dello studio; tu confermi con un clic.</p><span class="chip ok">Attiva</span></div>
+    <div class="box"><h3>Videovisite</h3><p class="nota">Il link alla videochiamata parte da solo con il promemoria.</p><span class="chip ok">Attiva</span></div>
+    <div class="box"><h3>Sincronizzazione</h3><p class="nota">Si vede anche in Google Calendar o nel calendario del telefono.</p><span class="chip inf">Google Calendar</span></div>
+  </div>
+</section>
+
+<!-- PAZIENTI -->
+<section class="vista" id="v-pazienti" hidden>
+  <div class="testa"><div class="sx"><h1>Pazienti</h1><span class="sotto">142 attivi · 37 archiviati</span></div><button class="btn p">+ Nuovo paziente</button></div>
+  <div class="cerca"><input id="cerca-paz" placeholder="Cerca per nome, patologia, obiettivo…" aria-label="Cerca pazienti"><button class="btn">Solo con app</button><button class="btn">Da ricontattare</button></div>
+  <div class="box tab-scroll"><table><thead><tr><th>Paziente</th><th>Obiettivo</th><th class="n">Peso</th><th class="n">Variazione</th><th>Ultima visita</th><th>App</th><th>Stato</th></tr></thead>
+  <tbody>
+    <tr><td><b>Giulia Verdi</b></td><td>Dimagrimento</td><td class="n">68,4 kg</td><td class="n">−3,2</td><td>9 nov</td><td>Sì</td><td><span class="chip ok">In linea</span></td></tr>
+    <tr><td><b>Paolo Neri</b></td><td>Massa muscolare</td><td class="n">79,0 kg</td><td class="n">+1,1</td><td>oggi</td><td>Sì</td><td><span class="chip inf">Nuovo</span></td></tr>
+    <tr><td><b>Marco Blu</b></td><td>Diabete tipo 2</td><td class="n">94,7 kg</td><td class="n">−2,0</td><td>26 ott</td><td>Sì</td><td><span class="chip err">Valori alti</span></td></tr>
+    <tr><td><b>Sara Gialli</b></td><td>Gravidanza</td><td class="n">64,2 kg</td><td class="n">+2,4</td><td>2 nov</td><td>Sì</td><td><span class="chip ok">In linea</span></td></tr>
+    <tr><td><b>A. C.</b></td><td>Celiachia</td><td class="n">55,8 kg</td><td class="n">+0,3</td><td>19 ott</td><td>Sì</td><td><span class="chip att">Inattivo</span></td></tr>
+    <tr><td><b>Luigi B.</b></td><td>Colesterolo</td><td class="n">86,1 kg</td><td class="n">−4,5</td><td>12 ott</td><td>No</td><td><span class="chip ok">In linea</span></td></tr>
+    <tr><td><b>E. F.</b></td><td>Pressione alta</td><td class="n">77,3 kg</td><td class="n">−1,4</td><td>5 nov</td><td>No</td><td><span class="chip ok">In linea</span></td></tr>
+    <tr><td><b>M. R.</b></td><td>Over 70, mantenimento</td><td class="n">61,0 kg</td><td class="n">0,0</td><td>28 set</td><td>No</td><td><span class="chip att">Controllo scaduto</span></td></tr>
+  </tbody></table></div>
+</section>
+
+<!-- SCHEDA PAZIENTE -->
+<section class="vista" id="v-scheda" hidden>
+  <div class="testa"><div class="sx"><h1>Giulia Verdi</h1><span class="sotto">34 anni · impiegata · obiettivo dimagrimento · in cura dal 14 settembre</span></div>
+  <div class="azioni"><button class="btn">Messaggio</button><button class="btn">Nuova misura</button><button class="btn p">Nuovo piano</button></div></div>
+  <div class="griglia g4">
+    <div class="box kpi"><div class="e">Peso</div><div class="v num">68,4 kg</div><div class="e">−3,2 dall'inizio</div></div>
+    <div class="box kpi"><div class="e">IMC</div><div class="v num">24,7</div><div class="e">normopeso</div></div>
+    <div class="box kpi"><div class="e">Massa grassa (BIA)</div><div class="v num">29,1%</div><div class="e">−2,8 punti</div></div>
+    <div class="box kpi"><div class="e">Fabbisogno</div><div class="v num">2.010 kcal</div><div class="e">basale 1.390 × LAF 1,45</div></div>
+  </div>
+  <div class="schede" role="tablist" id="sch-tab">
+    <button role="tab" aria-selected="true" data-t="t-misure">Misure</button>
+    <button role="tab" aria-selected="false" data-t="t-diario">Diario dall'app <span class="fase f2">F2</span></button>
+    <button role="tab" aria-selected="false" data-t="t-anam">Anamnesi</button>
+    <button role="tab" aria-selected="false" data-t="t-piani">Piani</button>
+    <button role="tab" aria-selected="false" data-t="t-doc">Documenti <span class="fase f2">F2</span></button>
+  </div>
+  <div id="t-misure" class="griglia g-21">
+    <div class="box"><h2>Andamento del peso</h2>
+      <svg viewBox="0 0 600 220" width="100%" role="img" aria-label="Peso da 71,6 a 68,4 kg in 8 settimane">
+        <g stroke="var(--line)" stroke-width="1"><line x1="40" y1="20" x2="590" y2="20"/><line x1="40" y1="80" x2="590" y2="80"/><line x1="40" y1="140" x2="590" y2="140"/><line x1="40" y1="200" x2="590" y2="200"/></g>
+        <text x="4" y="24">72</text><text x="4" y="84">70</text><text x="4" y="144">68</text><text x="4" y="204">66</text>
+        <polygon fill="var(--accent-soft)" points="40,32 118,47 196,59 275,74 353,83 431,95 510,104 588,116 588,200 40,200"/>
+        <polyline fill="none" stroke="var(--accent)" stroke-width="2.5" points="40,32 118,47 196,59 275,74 353,83 431,95 510,104 588,116"/>
+        <line x1="40" y1="140" x2="590" y2="140" stroke="var(--warn)" stroke-dasharray="4 4"/><text x="480" y="134" style="fill:var(--warn)">obiettivo 68</text>
+        <circle cx="588" cy="116" r="4.5" fill="var(--accent)"/>
+        <text x="34" y="216">14 set</text><text x="300" y="216">12 ott</text><text x="552" y="216">9 nov</text>
+      </svg></div>
+    <div class="box"><h2>Ultime misure</h2><div class="tab-scroll"><table><thead><tr><th>Data</th><th class="n">Peso</th><th class="n">Vita</th><th class="n">MG%</th></tr></thead>
+      <tbody><tr><td>9 nov</td><td class="n">68,4</td><td class="n">79</td><td class="n">29,1</td></tr><tr><td>26 ott</td><td class="n">69,3</td><td class="n">81</td><td class="n">30,0</td></tr><tr><td>12 ott</td><td class="n">70,0</td><td class="n">82</td><td class="n">30,6</td></tr><tr><td>28 set</td><td class="n">70,9</td><td class="n">84</td><td class="n">31,2</td></tr><tr><td>14 set</td><td class="n">71,6</td><td class="n">85</td><td class="n">31,9</td></tr></tbody></table></div></div>
+  </div>
+  <div id="t-diario" class="griglia g2" hidden>
+    <div class="box"><h2>Ieri, domenica 8</h2><div class="lista">
+      <div class="riga"><div class="t"><b>Colazione</b><small>come da piano</small></div><span class="chip ok">Fatto</span></div>
+      <div class="riga"><div class="t"><b>Pranzo</b><small>pizza margherita al posto della pasta · foto</small></div><span class="chip att">Sgarro</span></div>
+      <div class="riga"><div class="t"><b>Cena</b><small>come da piano</small></div><span class="chip ok">Fatto</span></div>
+      <div class="riga"><div class="t"><b>Acqua</b><small>1,6 litri su 2</small></div><span class="chip att">Poca</span></div>
+      <div class="riga"><div class="t"><b>Attività</b><small>camminata 45 minuti · 7.900 passi</small></div><span class="chip ok">Sì</span></div>
+    </div></div>
+    <div class="box"><h2>Ultimi 14 giorni</h2><p class="nota">Pasti rispettati, uno per riga del calendario.</p>
+      <div id="aderenza" style="display:grid;grid-template-columns:repeat(14,1fr);gap:4px;margin-top:10px"></div>
+      <p style="margin-top:12px">Aderenza al piano: <b class="num">86%</b> · umore medio <b>buono</b> · sonno <b class="num">7 h</b></p></div>
+  </div>
+  <div id="t-anam" class="box" hidden><div class="griglia g2">
+    <div><h3>Patologie e farmaci</h3><p>Ipotiroidismo in cura (levotiroxina 50 µg al mattino).</p><h3>Allergie e intolleranze</h3><p>Nessuna. Non gradisce il pesce azzurro.</p></div>
+    <div><h3>Abitudini</h3><p>Lavoro d'ufficio, pranzo in mensa 3 giorni su 5. Camminata 3 volte a settimana.</p><h3>Note della visita</h3><p>Fame nervosa la sera; inserita merenda proteica.</p></div></div></div>
+  <div id="t-piani" class="box" hidden><div class="lista">
+    <div class="riga"><div class="t"><b>Piano 1.600 kcal · autunno</b><small>creato il 12 ottobre · inviato all'app</small></div><span class="chip ok">In uso</span></div>
+    <div class="riga"><div class="t"><b>Piano 1.700 kcal · avvio</b><small>14 settembre</small></div><span class="chip inf">Archiviato</span></div></div></div>
+  <div id="t-doc" class="box" hidden><div class="lista">
+    <div class="riga"><div class="t"><b>Esami del sangue 30/10.pdf</b><small>caricato dalla paziente dall'app</small></div><button class="btn">Apri</button></div>
+    <div class="riga"><div class="t"><b>Consenso privacy firmato</b><small>14 settembre · firma dal telefono</small></div><span class="chip ok">Valido</span></div>
+    <div class="riga"><div class="t"><b>Referto bioimpedenza 9/11</b><small>importato da AKERN</small></div><button class="btn">Apri</button></div></div></div>
+</section>
+
+<!-- MESSAGGI -->
+<section class="vista" id="v-messaggi" hidden>
+  <div class="testa"><div class="sx"><h1>Messaggi</h1><span class="sotto">Chat con i pazienti che usano l'app · orari di risposta impostabili</span></div></div>
+  <div class="griglia" style="grid-template-columns:minmax(0,260px) minmax(0,1fr)" id="msg-grid">
+    <div class="box"><div class="lista">
+      <div class="riga"><div class="avatar">SG</div><div class="t" style="flex:1"><b>Sara Gialli</b><small>Posso cambiare la cena di…</small></div><span class="chip inf">2</span></div>
+      <div class="riga"><div class="avatar">MB</div><div class="t" style="flex:1"><b>Marco Blu</b><small>Ho inserito la glicemia</small></div><span class="chip inf">1</span></div>
+      <div class="riga"><div class="avatar">GV</div><div class="t" style="flex:1"><b>Giulia Verdi</b><small>Grazie, a presto!</small></div></div>
+    </div></div>
+    <div class="box"><h2>Sara Gialli</h2><div class="chat" style="margin-top:12px">
+      <div class="msg in">Buongiorno dottoressa, giovedì sera sono a cena dai miei suoceri. Posso cambiare la cena del piano?</div>
+      <div class="msg in">Di solito fanno pasta al forno.</div>
+      <div class="msg out">Certo. Prenda una porzione piccola, circa 120 g, con verdure cotte e salti la frutta. Venerdì torniamo al piano.</div>
+      <div class="msg in">Perfetto, grazie!</div>
+    </div>
+    <div class="cerca" style="margin-top:14px"><input placeholder="Scrivi un messaggio…" aria-label="Messaggio"><button class="btn">Allega piano</button><button class="btn p">Invia</button></div></div>
+  </div>
+</section>
+
+<!-- EDITOR DIETA -->
+<section class="vista" id="v-dieta" hidden>
+  <div class="testa"><div class="sx"><h1>Piano 1.600 kcal · Giulia Verdi</h1><span class="sotto">Obiettivo 1.600 kcal · proteine 22% · carboidrati 48% · grassi 30%</span></div>
+  <div class="azioni"><button class="btn">Modalità chetogenica <span class="fase f2">F2</span></button><button class="btn">Lista della spesa</button><button class="btn">Stampa</button><button class="btn p">Invia all'app</button></div></div>
+  <div class="schede" role="tablist"><button aria-selected="true">Lunedì · 1.612</button><button aria-selected="false">Martedì · 1.588</button><button aria-selected="false">Mercoledì · 1.604</button><button aria-selected="false">Giovedì · 1.620</button><button aria-selected="false">Venerdì · 1.597</button><button aria-selected="false">Sabato · 1.650</button><button aria-selected="false">Domenica · 1.702</button></div>
+  <div class="griglia g-21">
+    <div class="griglia g2" style="align-content:start">
+      <div class="pasto-b"><header><span>Colazione</span><span class="num">352 kcal</span></header>
+        <div class="voce"><span>Yogurt greco 0%</span><span>170 g</span></div><div class="voce"><span>Fiocchi d'avena</span><span>30 g</span></div><div class="voce"><span>Mirtilli</span><span>80 g</span></div><div class="voce"><span>Noci</span><span>10 g</span></div></div>
+      <div class="pasto-b"><header><span>Spuntino</span><span class="num">95 kcal</span></header><div class="voce"><span>Mela</span><span>180 g</span></div></div>
+      <div class="pasto-b"><header><span>Pranzo</span><span class="num">548 kcal</span></header>
+        <div class="voce"><span>Pasta integrale</span><span>70 g</span></div><div class="voce"><span>Ceci lessati</span><span>120 g</span></div><div class="voce"><span>Pomodorini</span><span>150 g</span></div><div class="voce"><span>Olio extravergine</span><span>10 g</span></div></div>
+      <div class="pasto-b"><header><span>Merenda</span><span class="num">140 kcal</span></header><div class="voce"><span>Latte parzialmente scremato</span><span>200 ml</span></div><div class="voce"><span>Gallette di riso</span><span>10 g</span></div></div>
+      <div class="pasto-b"><header><span>Cena</span><span class="num">477 kcal</span></header>
+        <div class="voce"><span>Petto di pollo</span><span>140 g</span></div><div class="voce"><span>Patate</span><span>200 g</span></div><div class="voce"><span>Zucchine</span><span>200 g</span></div><div class="voce"><span>Olio extravergine</span><span>10 g</span></div></div>
+      <div class="pasto-b" style="border-style:dashed;justify-content:center;align-items:center;color:var(--muted)">+ Aggiungi pasto o ricetta</div>
+    </div>
+    <div class="box" style="align-self:start"><h2>Riepilogo lunedì</h2>
+      <p style="margin:10px 0 4px">Calorie <b class="num">1.612 / 1.600</b></p><div class="barra"><i style="width:100%"></i></div>
+      <p style="margin:12px 0 4px">Proteine <b class="num">92 g · 23%</b> · 1,3 g/kg</p><div class="barra"><i style="width:96%"></i></div>
+      <p style="margin:12px 0 4px">Carboidrati <b class="num">190 g · 47%</b></p><div class="barra"><i style="width:98%"></i></div>
+      <p style="margin:12px 0 4px">Grassi <b class="num">54 g · 30%</b></p><div class="barra"><i style="width:100%"></i></div>
+      <p style="margin:12px 0 4px">Fibre <b class="num">31 g</b> · sale stimato <b class="num">4,1 g</b></p><div class="barra"><i style="width:100%"></i></div>
+      <p class="nota" style="margin-top:12px">Media della settimana 1.625 kcal · nessun allergene segnalato nell'anamnesi.</p>
+      <button class="btn" style="margin-top:8px;width:100%">Adatta le grammature all'obiettivo</button></div>
+  </div>
+</section>
+
+<!-- DIETE PRONTE E RICETTE -->
+<section class="vista" id="v-modelli" hidden>
+  <div class="testa"><div class="sx"><h1>Diete pronte e ricette</h1><span class="sotto">Modelli controllati da un nutrizionista; si adattano alle calorie del paziente con un clic</span></div><button class="btn p">+ Nuova ricetta</button></div>
+  <div class="cerca"><input placeholder="Cerca dieta o ricetta…" aria-label="Cerca modelli"><button class="btn">Vegetariana</button><button class="btn">Senza glutine</button><button class="btn">Diabete</button><button class="btn">Sport</button></div>
+  <h2>Diete pronte</h2>
+  <div class="griglia g4">
+    <div class="box"><span class="chip ok">Mediterranea</span><h3 style="margin-top:8px">Dimagrimento graduale</h3><p class="nota">1.200–2.000 kcal · 7 giorni · stagionale</p><button class="btn" style="margin-top:6px">Usa per un paziente</button></div>
+    <div class="box"><span class="chip inf">Patologia</span><h3 style="margin-top:8px">Diabete tipo 2</h3><p class="nota">basso indice glicemico · carboidrati distribuiti</p><button class="btn" style="margin-top:6px">Usa per un paziente</button></div>
+    <div class="box"><span class="chip inf">Patologia</span><h3 style="margin-top:8px">DASH per la pressione</h3><p class="nota">sodio sotto i 2 g · ricca di potassio</p><button class="btn" style="margin-top:6px">Usa per un paziente</button></div>
+    <div class="box"><span class="chip att">Chetogenica</span><h3 style="margin-top:8px">VLCKD in 3 fasi</h3><p class="nota">carboidrati netti &lt; 30 g · polioli esclusi</p><button class="btn" style="margin-top:6px">Usa per un paziente</button></div>
+  </div>
+  <h2>Ricette dello studio</h2>
+  <div class="box tab-scroll"><table><thead><tr><th>Ricetta</th><th>Pasto</th><th class="n">Porzione</th><th class="n">kcal</th><th class="n">P</th><th class="n">C</th><th class="n">G</th><th>Adatta a</th></tr></thead><tbody>
+    <tr><td><b>Pasta e ceci al rosmarino</b></td><td>Pranzo</td><td class="n">320 g</td><td class="n">468</td><td class="n">19</td><td class="n">72</td><td class="n">11</td><td>vegetariana</td></tr>
+    <tr><td><b>Merluzzo al cartoccio con patate</b></td><td>Cena</td><td class="n">380 g</td><td class="n">395</td><td class="n">33</td><td class="n">38</td><td class="n">10</td><td>senza glutine</td></tr>
+    <tr><td><b>Porridge con frutti rossi</b></td><td>Colazione</td><td class="n">250 g</td><td class="n">310</td><td class="n">14</td><td class="n">45</td><td class="n">8</td><td>vegetariana</td></tr>
+    <tr><td><b>Frittata di albumi e spinaci</b></td><td>Cena</td><td class="n">230 g</td><td class="n">180</td><td class="n">27</td><td class="n">4</td><td class="n">6</td><td>chetogenica, sport</td></tr>
+  </tbody></table></div>
+</section>
+
+<!-- BIA -->
+<section class="vista" id="v-bia" hidden>
+  <div class="testa"><div class="sx"><h1>Bioimpedenza · Paolo Neri</h1><span class="sotto">Importata da AKERN BIA 101 · oggi alle 10:42</span></div>
+  <div class="azioni"><button class="btn">Importa file AKERN</button><button class="btn p">Salva nella scheda</button></div></div>
+  <div class="griglia g-21">
+    <div class="box"><h2>Grafico vettoriale (RXc)</h2><p class="nota">Il punto mostra idratazione e massa cellulare rispetto ai riferimenti per sesso ed età.</p>
+      <svg viewBox="0 0 520 300" width="100%" role="img" aria-label="Grafico vettoriale: punto dentro l'ellisse del 50%">
+        <line x1="50" y1="270" x2="500" y2="270" stroke="var(--line)"/><line x1="50" y1="20" x2="50" y2="270" stroke="var(--line)"/>
+        <text x="460" y="288">R/H Ω/m</text><text x="54" y="16">Xc/H Ω/m</text>
+        <g transform="rotate(-38 270 150)">
+          <ellipse cx="270" cy="150" rx="190" ry="70" fill="none" stroke="var(--muted)" stroke-dasharray="4 4"/>
+          <ellipse cx="270" cy="150" rx="140" ry="50" fill="none" stroke="var(--muted)" stroke-dasharray="2 4"/>
+          <ellipse cx="270" cy="150" rx="80" ry="28" fill="var(--accent-soft)" stroke="var(--accent)"/>
+        </g>
+        <text x="390" y="40">95%</text><text x="352" y="76">75%</text><text x="320" y="112">50%</text>
+        <circle cx="285" cy="138" r="7" fill="var(--accent)"/><text x="296" y="134" style="fill:var(--fg)">oggi</text>
+        <circle cx="306" cy="160" r="5" fill="var(--muted)"/><text x="314" y="174">13 ott</text>
+        <line x1="306" y1="160" x2="289" y2="142" stroke="var(--muted)" stroke-width="1.5"/>
+        <text x="60" y="260">più idratato ↙</text><text x="400" y="260">↗ meno idratato</text>
+      </svg></div>
+    <div class="box"><h2>Valori misurati</h2><div class="tab-scroll"><table><tbody>
+      <tr><td>Resistenza</td><td class="n">482 Ω</td></tr><tr><td>Reattanza</td><td class="n">58 Ω</td></tr><tr><td>Angolo di fase</td><td class="n">6,9°</td></tr>
+      <tr><td>Acqua totale</td><td class="n">47,1 L · 59,6%</td></tr><tr><td>Massa magra</td><td class="n">64,4 kg</td></tr><tr><td>Massa grassa</td><td class="n">14,6 kg · 18,5%</td></tr>
+      <tr><td>Massa cellulare</td><td class="n">35,2 kg</td></tr><tr><td>Basale stimato</td><td class="n">1.890 kcal</td></tr></tbody></table></div>
+      <p class="nota" style="margin-top:10px">Il basale misurato può sostituire Mifflin-St Jeor nel calcolo del fabbisogno.</p></div>
+  </div>
+</section>
+
+<!-- AI -->
+<section class="vista" id="v-ai" hidden>
+  <div class="testa"><div class="sx"><h1>Assistente AI</h1><span class="sotto">Prepara bozze; decide sempre il professionista. I dati non escono dall'Unione Europea.</span></div></div>
+  <div class="griglia g-21">
+    <div class="box"><div class="chat">
+      <div class="msg out">Prepara una bozza di piano da 1.800 kcal per Marco Blu: diabete tipo 2, niente pesce, pranzo fuori casa nei giorni lavorativi.</div>
+      <div class="msg in">Ho preparato una bozza di 7 giorni a basso indice glicemico, con i carboidrati divisi su 5 pasti e pranzi da portare in ufficio. Media 1.796 kcal, proteine 21%, carboidrati 46% (di cui zuccheri 9%), fibre 34 g al giorno.<br><br>Due punti da controllare: la metformina va presa ai pasti, quindi ho tenuto la colazione abbondante; il sabato c'è una pizza da 300 g compensata a cena.</div>
+      <div class="msg out">Togli la pizza e metti più legumi.</div>
+      <div class="msg in">Fatto: pizza sostituita con farro, lenticchie e verdure; legumi 4 volte a settimana. Apro la bozza nell'editor?</div>
+    </div>
+    <div class="cerca" style="margin-top:14px"><input placeholder="Chiedi una bozza, un'alternativa, un riassunto…" aria-label="Richiesta all'assistente"><button class="btn p">Chiedi</button></div></div>
+    <div class="griglia" style="align-content:start">
+      <div class="box"><h3>Cosa sa fare</h3><div class="lista">
+        <div class="riga"><small>Bozza di piano dai dati della scheda</small></div><div class="riga"><small>Alternative a un alimento o a un pasto</small></div>
+        <div class="riga"><small>Riassunto del diario degli ultimi 14 giorni</small></div><div class="riga"><small>Testo della relazione per il medico</small></div></div></div>
+      <div class="box"><h3>Cosa non fa</h3><p class="nota">Non invia nulla al paziente da solo e non fa diagnosi: ogni bozza va aperta, controllata e firmata dal nutrizionista.</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- FATTURE -->
+<section class="vista" id="v-fatture" hidden>
+  <div class="testa"><div class="sx"><h1>Fatture</h1><span class="sotto">Fattura elettronica tramite un servizio esterno · invio al Sistema Tessera Sanitaria per il 730</span></div><button class="btn p">+ Nuova fattura</button></div>
+  <div class="griglia g3">
+    <div class="box kpi"><div class="e">Incassato a novembre</div><div class="v num">1.840 €</div><div class="e">23 visite</div></div>
+    <div class="box kpi"><div class="e">Da incassare</div><div class="v num">160 €</div><div class="e">2 fatture</div></div>
+    <div class="box kpi"><div class="e">Incassato nel 2026</div><div class="v num">19.420 €</div><div class="e">regime forfettario</div></div>
+  </div>
+  <div class="box tab-scroll"><table><thead><tr><th>Numero</th><th>Data</th><th>Paziente</th><th>Prestazione</th><th class="n">Importo</th><th>Sistema TS</th><th>Stato</th></tr></thead><tbody>
+    <tr><td class="num">2026/214</td><td>9 nov</td><td>Giulia Verdi</td><td>Visita di controllo</td><td class="n">60,00 €</td><td><span class="chip ok">Inviata</span></td><td><span class="chip ok">Pagata</span></td></tr>
+    <tr><td class="num">2026/213</td><td>6 nov</td><td>E. F.</td><td>Visita di controllo</td><td class="n">60,00 €</td><td><span class="chip ok">Inviata</span></td><td><span class="chip ok">Pagata</span></td></tr>
+    <tr><td class="num">—</td><td>6 nov</td><td>A. C.</td><td>Prima visita + BIA</td><td class="n">100,00 €</td><td><span class="chip att">In attesa</span></td><td><span class="chip att">Da emettere</span></td></tr>
+    <tr><td class="num">—</td><td>6 nov</td><td>M. R.</td><td>Visita di controllo</td><td class="n">60,00 €</td><td><span class="chip att">In attesa</span></td><td><span class="chip att">Da emettere</span></td></tr>
+  </tbody></table></div>
+  <p class="nota">Bollo da 2 € aggiunto da solo sopra i 77,47 €. Il paziente può pagare con un link dall'app.</p>
+</section>
+
+<!-- PRIVACY -->
+<section class="vista" id="v-privacy" hidden>
+  <div class="testa"><div class="sx"><h1>Privacy e Fascicolo Sanitario</h1><span class="sotto">Consensi, registro degli accessi e collegamenti esterni</span></div></div>
+  <div class="griglia g2">
+    <div class="box"><h2>Consensi dei pazienti</h2><div class="lista">
+      <div class="riga"><div class="t"><b>Informativa e consenso</b><small>firmati dal telefono con codice SMS</small></div><span class="chip ok">139 su 142</span></div>
+      <div class="riga"><div class="t"><b>Uso dell'app e del diario</b><small>facoltativo</small></div><span class="chip ok">96 pazienti</span></div>
+      <div class="riga"><div class="t"><b>Da firmare</b><small>Paolo Neri, A. C., M. R.</small></div><button class="btn">Invia richiesta</button></div></div></div>
+    <div class="box"><h2>Sicurezza dei dati</h2><div class="lista">
+      <div class="riga"><div class="t"><b>Server in Unione Europea</b><small>Francoforte, copie ogni notte</small></div><span class="chip ok">Attivo</span></div>
+      <div class="riga"><div class="t"><b>Accesso con doppio controllo</b><small>password più codice sul telefono</small></div><span class="chip ok">Attivo</span></div>
+      <div class="riga"><div class="t"><b>Registro degli accessi</b><small>chi ha aperto quale scheda e quando</small></div><button class="btn">Apri</button></div>
+      <div class="riga"><div class="t"><b>Esporta o cancella i dati di un paziente</b><small>diritti previsti dal GDPR</small></div><button class="btn">Gestisci</button></div></div></div>
+    <div class="box"><h2>Fascicolo Sanitario Elettronico <span class="fase f3">F3</span></h2><p class="nota" style="margin:6px 0 10px">Tramite un partner già accreditato: il referto della visita va nel fascicolo del paziente, se lui acconsente.</p>
+      <div class="riga"><div class="t"><b>Partner</b><small>da scegliere</small></div><span class="chip att">Non collegato</span></div></div>
+    <div class="box"><h2>Abbonamento</h2><p class="nota" style="margin:6px 0 10px">Piano Studio · fino a 300 pazienti attivi · app del paziente inclusa.</p>
+      <div class="riga"><div class="t"><b>Prossimo rinnovo</b><small>1 dicembre 2026</small></div><span class="chip inf">Mensile</span></div></div>
+  </div>
+</section>
+
+</main>
+</div>
+
+<!-- ============ MODALITÀ PAZIENTE ============ -->
+<div class="palco" id="paziente" hidden>
+  <div class="tel" aria-label="Anteprima dell'app del paziente">
+    <div class="sb"><span>9:41</span><span>NutriPiano</span><span>100%</span></div>
+    <div class="corpo">
+      <!-- oggi -->
+      <div data-p="p-oggi">
+        <h2>Ciao Giulia</h2><p class="nota">Lunedì 9 novembre · piano 1.600 kcal</p>
+        <div class="box" style="margin-top:10px;padding:12px"><div style="display:flex;justify-content:space-between"><b>Oggi</b><span class="num">852 / 1.600 kcal</span></div><div class="barra" style="margin-top:6px"><i style="width:53%"></i></div></div>
+        <div class="lista" style="margin-top:6px">
+          <div class="check si"><i></i><span>Colazione · yogurt greco, avena, mirtilli</span></div>
+          <div class="check si"><i></i><span>Spuntino · una mela</span></div>
+          <div class="check si"><i></i><span>Pranzo · pasta integrale e ceci</span></div>
+          <div class="check"><i></i><span>Merenda · latte e gallette</span></div>
+          <div class="check"><i></i><span>Cena · pollo, patate, zucchine</span></div>
+        </div>
+        <div class="box" style="margin-top:10px;padding:12px"><b>Acqua</b> <span class="num">1,2 / 2 L</span><div class="barra" style="margin-top:6px"><i class="w" style="width:60%"></i></div></div>
+        <button class="btn" style="width:100%;margin-top:10px">Cambia un alimento</button>
+      </div>
+      <!-- diario -->
+      <div data-p="p-diario" hidden>
+        <h2>Diario di oggi</h2><p class="nota">La dottoressa vede quello che scrivi.</p>
+        <div class="foto" style="margin-top:10px">Foto del pranzo</div>
+        <div class="lista" style="margin-top:8px">
+          <div class="riga"><small>Come ti senti?</small><span>🙂 Bene</span></div>
+          <div class="riga"><small>Fame da 1 a 5</small><b class="num">3</b></div>
+          <div class="riga"><small>Passi</small><b class="num">6.420</b></div>
+          <div class="riga"><small>Sonno</small><b class="num">7 h</b></div>
+          <div class="riga"><small>Note</small><span class="nota">a pranzo ho aggiunto insalata</span></div>
+        </div>
+        <button class="btn p" style="width:100%;margin-top:10px">Salva il diario</button>
+      </div>
+      <!-- progressi -->
+      <div data-p="p-progressi" hidden>
+        <h2>I tuoi progressi</h2>
+        <div class="box" style="margin-top:10px;padding:12px"><p class="nota">Peso</p><b class="num" style="font-size:1.5rem">68,4 kg</b> <span class="chip ok">−3,2 kg</span>
+          <svg viewBox="0 0 280 100" width="100%" aria-label="Peso in calo"><polyline fill="none" stroke="var(--accent)" stroke-width="2.5" points="5,10 45,22 85,32 125,46 165,54 205,66 245,74 275,84"/><circle cx="275" cy="84" r="4" fill="var(--accent)"/></svg></div>
+        <div class="box" style="margin-top:10px;padding:12px"><p class="nota">Giro vita</p><b class="num" style="font-size:1.5rem">79 cm</b> <span class="chip ok">−6 cm</span></div>
+        <button class="btn" style="width:100%;margin-top:10px">Inserisci il peso di oggi</button>
+        <p class="nota" style="margin-top:10px">Prossima visita: lunedì 23 novembre alle 09:00</p>
+      </div>
+      <!-- spesa -->
+      <div data-p="p-spesa" hidden>
+        <h2>Lista della spesa</h2><p class="nota">Calcolata dal piano per 7 giorni</p>
+        <div class="lista" style="margin-top:8px">
+          <div class="check si"><i></i><span>Yogurt greco 0% · 1,2 kg</span></div>
+          <div class="check"><i></i><span>Petto di pollo · 560 g</span></div>
+          <div class="check"><i></i><span>Ceci secchi · 300 g</span></div>
+          <div class="check"><i></i><span>Pasta integrale · 500 g</span></div>
+          <div class="check"><i></i><span>Zucchine · 1 kg</span></div>
+          <div class="check si"><i></i><span>Mele · 1,3 kg</span></div>
+          <div class="check"><i></i><span>Olio extravergine · 1 bottiglia</span></div>
+        </div>
+        <h3 style="margin-top:12px">Ricetta della settimana</h3><p class="nota">Pasta e ceci al rosmarino · 25 minuti</p>
+      </div>
+      <!-- chat -->
+      <div data-p="p-chat" hidden>
+        <h2>Dott.ssa Ferri</h2><p class="nota">Risponde di solito entro la giornata</p>
+        <div class="chat" style="margin-top:10px">
+          <div class="msg out">Domenica ho mangiato una pizza, ho rovinato tutto?</div>
+          <div class="msg in">No, una pizza non cambia il risultato. Oggi riprendi il piano e bevi un po' di più.</div>
+          <div class="msg out">Ok grazie!</div>
+        </div>
+        <div class="box" style="margin-top:12px;padding:10px"><b>Assistente</b> <span class="fase f3">F3</span><p class="nota">«Cosa posso mangiare al posto del pollo stasera?» → propone 3 alternative prese dal tuo piano.</p></div>
+      </div>
+    </div>
+    <nav aria-label="Menu dell'app">
+      <button data-pv="p-oggi" aria-pressed="true"><svg viewBox="0 0 24 24"><path d="M4 11l8-7 8 7v9H4z"/></svg>Oggi</button>
+      <button data-pv="p-diario" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M6 3h12v18H6zM9 8h6M9 12h6"/></svg>Diario</button>
+      <button data-pv="p-progressi" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 19l5-6 4 3 7-9"/></svg>Progressi</button>
+      <button data-pv="p-spesa" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M5 7h14l-1.5 12h-11zM9 7a3 3 0 0 1 6 0"/></svg>Spesa</button>
+      <button data-pv="p-chat" aria-pressed="false"><svg viewBox="0 0 24 24"><path d="M4 5h16v11H9l-5 4z"/></svg>Chat</button>
+    </nav>
+  </div>
+  <div class="spiega">
+    <h2>App del paziente <span class="fase f2">Fase 2</span></h2>
+    <p>Il paziente la installa dal link che riceve dopo la visita, senza passare dagli store. Vede solo il suo piano e i suoi dati.</p>
+    <ul>
+      <li><b>Oggi</b>: i pasti del giorno da spuntare e l'acqua.</li>
+      <li><b>Diario</b>: foto dei pasti, fame, umore, passi e sonno, che arrivano nella scheda del nutrizionista.</li>
+      <li><b>Progressi</b>: peso e misure con grafico, e la data della prossima visita.</li>
+      <li><b>Spesa</b>: la lista calcolata dal piano e le ricette.</li>
+      <li><b>Chat</b>: messaggi con lo studio; più avanti un assistente per le sostituzioni.</li>
+    </ul>
+    <p class="nota">Tocca le icone in basso nel telefono per cambiare schermata.</p>
+  </div>
+</div>
+
+<script>
+(function(){
+  const viste=['oggi','agenda','pazienti','scheda','messaggi','dieta','modelli','bia','ai','fatture','privacy'];
+  function mostra(){
+    let h=(location.hash||'#oggi').slice(1);
+    const paz = h==='paziente';
+    document.getElementById('studio').hidden=paz;
+    document.getElementById('paziente').hidden=!paz;
+    document.getElementById('m-studio').setAttribute('aria-pressed',String(!paz));
+    document.getElementById('m-paz').setAttribute('aria-pressed',String(paz));
+    if(paz) return;
+    if(!viste.includes(h)) h='oggi';
+    viste.forEach(v=>{document.getElementById('v-'+v).hidden=(v!==h)});
+    document.querySelectorAll('nav.lato a').forEach(a=>{
+      if(a.getAttribute('href')==='#'+h) a.setAttribute('aria-current','page'); else a.removeAttribute('aria-current');
+    });
+    window.scrollTo(0,0);
+  }
+  window.addEventListener('hashchange',mostra);
+  document.getElementById('m-paz').onclick=()=>{location.hash='paziente'};
+  document.getElementById('m-studio').onclick=()=>{location.hash='oggi'};
+  mostra();
+
+  // schede del paziente
+  document.querySelectorAll('#sch-tab button').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('#sch-tab button').forEach(x=>{x.setAttribute('aria-selected',String(x===b));document.getElementById(x.dataset.t).hidden=(x!==b)});
+  });
+  // schede giorni editor (solo aspetto)
+  document.querySelectorAll('#v-dieta .schede button').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('#v-dieta .schede button').forEach(x=>x.setAttribute('aria-selected',String(x===b)));
+  });
+  // telefono
+  document.querySelectorAll('.tel nav button').forEach(b=>b.onclick=()=>{
+    document.querySelectorAll('.tel nav button').forEach(x=>x.setAttribute('aria-pressed',String(x===b)));
+    document.querySelectorAll('[data-p]').forEach(p=>p.hidden=(p.dataset.p!==b.dataset.pv));
+  });
+  // agenda
+  const cal=document.getElementById('cal');
+  const giorni=['Lun 9','Mar 10','Mer 11','Gio 12','Ven 13'];
+  const app={'0-0':['Giulia Verdi',0],'0-1':['Paolo Neri',0],'0-3':['Sara Gialli',1],'0-6':['Marco Blu',0],'0-7':['Luigi B.',0],'0-9':['E. F.',0],
+    '1-1':['A. C.',0],'1-2':['Nuovo paziente',0],'1-5':['Lucia T.',1],'2-0':['M. R.',0],'2-4':['Studio chiuso',2],'2-5':['Studio chiuso',2],
+    '3-2':['Andrea P.',0],'3-3':['Chiara S.',1],'3-7':['Giulia Verdi',0],'4-1':['Roberto D.',0],'4-6':['Elena M.',0],'4-8':['Videovisita',1]};
+  let html='<div class="h"></div>'+giorni.map(g=>'<div class="h">'+g+'</div>').join('');
+  for(let r=0;r<10;r++){
+    const ora=String(9+r).padStart(2,'0')+':00';
+    html+='<div class="o">'+ora+'</div>';
+    for(let d=0;d<5;d++){const a=app[d+'-'+r];
+      html+='<div>'+(a? (a[1]===2?'<span class="nota">'+a[0]+'</span>':'<span class="app'+(a[1]?' v':'')+'">'+a[0]+'</span>'):'')+'</div>';}
+  }
+  cal.innerHTML=html;
+  // aderenza
+  const ad=document.getElementById('aderenza');const val=[5,5,4,5,3,5,5,4,5,5,2,5,5,4];
+  ad.innerHTML=val.map((v,i)=>'<div title="giorno '+(i+1)+': '+v+' pasti su 5" style="display:flex;flex-direction:column;gap:2px">'+
+    Array.from({length:5},(_,k)=>'<i style="height:10px;border-radius:2px;background:'+(k<v?'var(--accent)':'var(--sunk)')+'"></i>').join('')+'</div>').join('');
+  // messaggi responsive
+  const mg=document.getElementById('msg-grid');
+  const mq=matchMedia('(max-width:900px)');const fx=()=>{mg.style.gridTemplateColumns=mq.matches?'1fr':'minmax(0,260px) minmax(0,1fr)'};mq.addEventListener('change',fx);fx();
+})();
+</script>
+
+</html>
