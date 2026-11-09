@@ -553,6 +553,8 @@ svg text{fill:var(--muted);font-family:var(--mono);font-size:10px}
   document.getElementById('m-paz').onclick=()=>{location.hash='paziente'};
   document.getElementById('m-studio').onclick=()=>{location.hash='oggi'};
   mostra();
+  // pazienti: clic sulla riga apre la scheda (nel prototipo è sempre la stessa scheda di esempio)
+  document.querySelectorAll("#v-pazienti tbody tr").forEach(tr=>{tr.style.cursor="pointer";tr.onclick=()=>{const n=tr.querySelector("b").textContent;const h=document.querySelector("#v-scheda h1");if(h)h.textContent=n;location.hash="scheda"}});
 
   // schede del paziente
   document.querySelectorAll('#sch-tab button').forEach(b=>b.onclick=()=>{
